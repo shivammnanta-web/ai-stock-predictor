@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockSense AI — Intelligent Stock Predictions</title>
+    <meta name="description" content="AI-powered stock market analysis and prediction with precise buy/sell signals, stop-loss recommendations, and success rate tracking.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- Background mesh -->
+    <div class="bg-mesh"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                </div>
+                <span class="logo-text">StockSense <span class="logo-accent">AI</span></span>
+            </div>
+            <div class="header-right">
+                <span class="live-badge"><span class="live-dot"></span>Live Market Data</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <!-- Hero Search -->
+        <section class="hero">
+            <div class="hero-label">AI-POWERED STOCK ANALYSIS</div>
+            <h1 class="hero-title">Predict. Analyze. <span class="hero-highlight">Profit.</span></h1>
+            <p class="hero-subtitle">Analyzes 6 months of live market data to predict exact buy &amp; sell times, stop-loss levels, and precision success rates — all powered by Machine Learning.</p>
+
+            <div class="search-bar" id="search-bar">
+                <div class="search-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <input type="text" id="ticker-input" class="search-input" placeholder="Search for stock name or ticker..." autocomplete="off" />
+                <button class="search-btn" id="analyze-btn" onclick="analyzeStock()">
+                    <span id="btn-text">Analyze Now</span>
+                    <div class="btn-spinner hidden" id="btn-spinner"></div>
+                </button>
+                <div id="suggestions-list" class="suggestions-list hidden"></div>
+            </div>
+            <div class="quick-picks">
+                <span class="quick-label">🇺🇸 US:</span>
+                <button class="quick-btn" onclick="quickSearch('AAPL')">AAPL</button>
+                <button class="quick-btn" onclick="quickSearch('TSLA')">TSLA</button>
+                <button class="quick-btn" onclick="quickSearch('MSFT')">MSFT</button>
+                <button class="quick-btn" onclick="quickSearch('GOOGL')">GOOGL</button>
+                <button class="quick-btn" onclick="quickSearch('NVDA')">NVDA</button>
+            </div>
+            <div class="quick-picks" style="margin-top: 8px;">
+                <span class="quick-label">🇮🇳 NSE:</span>
+                <button class="quick-btn india" onclick="quickSearch('RELIANCE.NS')">RELIANCE</button>
+                <button class="quick-btn india" onclick="quickSearch('TCS.NS')">TCS</button>
+                <button class="quick-btn india" onclick="quickSearch('INFY.NS')">INFY</button>
+                <button class="quick-btn india" onclick="quickSearch('HDFCBANK.NS')">HDFCBANK</button>
+                <button class="quick-btn india" onclick="quickSearch('WIPRO.NS')">WIPRO</button>
+            </div>
+        </section>
+
+        <!-- Results Section (hidden initially) -->
+        <section id="results-section" class="results-section hidden">
+
+            <!-- Ticker header -->
+            <div class="results-header">
+                <div class="ticker-badge" id="res-ticker">AAPL</div>
+                <div class="analysis-timestamp">Analysis completed <span id="analysis-time"></span></div>
+            </div>
+
+            <!-- Diplomatic Result Banner -->
+            <div class="diplomatic-banner" id="diplomatic-banner">
+                <div class="diplomatic-inner">
+                    <div class="diplomatic-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    </div>
+                    <div class="diplomatic-content">
+                        <div class="diplomatic-label">Diplomatic Thinking Result</div>
+                        <div class="diplomatic-value" id="res-diplomatic-action">ANALYZING...</div>
+                        <div class="diplomatic-reasoning" id="res-diplomatic-reasoning">Fusing technical signals with market news sentiment...</div>
+                    </div>
+                    <div class="diplomatic-score-circle">
+                        <span id="res-diplomatic-score">--%</span>
+                        <div class="score-label">Confidence</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Metric Cards -->
+            <div class="cards-grid">
+                <!-- Tech Signal Card -->
+                <div class="card card-action" id="action-card">
+                    <div class="card-label">Technical Signal</div>
+                    <div class="card-value action-value" id="res-action">BUY</div>
+                    <div class="card-sub" id="res-time">Thursday, Mar 12 at 4:00 PM</div>
+                </div>
+                <!-- Price Card -->
+                <div class="card card-price">
+                    <div class="card-label">Current Price</div>
+                    <div class="card-value" id="res-price">$0.00</div>
+                    <div class="card-sub">Latest market close</div>
+                </div>
+                <!-- News Card -->
+                <div class="card card-sentiment">
+                    <div class="card-label">News Sentiment</div>
+                    <div class="card-value action-value" id="res-sentiment-tone">NEUTRAL</div>
+                    <div class="card-sub">Avg Score: <span id="res-sentiment-score">0.0</span></div>
+                </div>
+                <!-- Success Rate Card -->
+                <div class="card card-success">
+                    <div class="card-label">Historical Precision</div>
+                    <div class="card-value" id="res-success">0%</div>
+                    <div class="card-sub">Backtested accuracy</div>
+                </div>
+            </div>
+
+            <!-- News Pulse Section -->
+            <div class="news-pulse-section">
+                <div class="news-pulse-header">
+                    <div class="pulse-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20l-7-7-7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        Market News Pulse (Sentiment Analysis)
+                    </div>
+                </div>
+                <div class="news-headlines" id="res-headlines">
+                    <!-- Headlines will be injected here -->
+                    <div class="headline-placeholder">Analyzing recent headlines...</div>
+                </div>
+            </div>
+
+            <!-- Confidence Bar -->
+            <div class="confidence-section">
+                <div class="confidence-header">
+                    <span>Prediction Confidence</span>
+                    <span id="res-confidence-pct">0%</span>
+                </div>
+                <div class="confidence-bar-bg">
+                    <div class="confidence-bar-fill" id="confidence-fill" style="width: 0%"></div>
+                </div>
+                <div class="confidence-footer">
+                    <span>Low Confidence</span>
+                    <span>High Confidence</span>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <div class="chart-title">6-Month Price History</div>
+                    <div class="chart-signal-legend">
+                        <span class="legend-item"><span class="legend-dot green"></span> Price</span>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="price-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Feedback Section: "Did it work?" -->
+            <div class="feedback-section" id="feedback-section">
+                <div class="feedback-question">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Did you follow this signal? <strong>Did it work?</strong></span>
+                </div>
+                <div class="feedback-buttons" id="feedback-buttons">
+                    <button class="feedback-btn yes" id="feedback-yes" onclick="submitFeedback(true)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Yes, it worked!
+                    </button>
+                    <button class="feedback-btn no" id="feedback-no" onclick="submitFeedback(false)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        No, it didn't
+                    </button>
+                </div>
+                <div class="feedback-submitted hidden" id="feedback-submitted">
+                    <div class="feedback-thanks">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span id="feedback-thanks-msg">Thank you for your feedback! 🙏</span>
+                    </div>
+                    <button class="retrain-btn" id="retrain-btn" onclick="retrainModel()">
+                        <div class="retrain-spinner hidden" id="retrain-spinner"></div>
+                        <svg id="retrain-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.01"/></svg>
+                        <span id="retrain-text">Retrain Model with My Feedback</span>
+                    </button>
+                    <div class="retrain-result hidden" id="retrain-result"></div>
+                </div>
+            </div>
+
+            <!-- Community Accuracy -->
+            <div class="community-section hidden" id="community-section">
+                <div class="community-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Community Accuracy for <span id="community-ticker">--</span>
+                </div>
+                <div class="community-stats">
+                    <div class="community-stat">
+                        <span class="community-stat-val" id="community-total">--</span>
+                        <span class="community-stat-label">Reviews</span>
+                    </div>
+                    <div class="community-stat">
+                        <span class="community-stat-val green" id="community-correct">--</span>
+                        <span class="community-stat-label">Worked</span>
+                    </div>
+                    <div class="community-stat">
+                        <span class="community-stat-val accent" id="community-accuracy">--%</span>
+                        <span class="community-stat-label">User Accuracy</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="disclaimer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>StockSense AI predictions are based on mathematical models and historical patterns. They do not constitute financial advice. Past success rates do not guarantee future results. Always do your own research before investing.</span>
+            </div>
+
+        </section>
+
+
+        <!-- Error Section -->
+        <div class="error-box hidden" id="error-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="error-msg">An error occurred. Please try again.</span>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <p>StockSense AI &copy; 2026 &mdash; Powered by Machine Learning &amp; yfinance data</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
